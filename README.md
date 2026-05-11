@@ -1,5 +1,6 @@
 ## Para correr el proyecto primero compilarlo con:
 mvn clean compile
+## Luego ejecutar desde el archivo main/java/app/Launcher
 ## Luego para sacar el reporte de SonarCube usar: 
 docker run --rm \
   -e SONAR_HOST_URL="http://host.docker.internal:9000" \
