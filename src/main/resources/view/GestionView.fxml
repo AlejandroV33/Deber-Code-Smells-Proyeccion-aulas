@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="app.controller.GestionController" styleClass="main-container">
+
+    <top>
+        <HBox spacing="15" styleClass="top-bar" alignment="CENTER_LEFT">
+            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+            <Button text="← Volver al Inicio" onAction="#volverInicio" styleClass="btn-nav"/>
+            <Label text="Gestión de Registros y Ocupación" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <TabPane fx:id="mainTabPane" tabClosingPolicy="UNAVAILABLE">
+
+            <Tab text="Modo Edición (Gestión de Registros)">
+
+                <TabPane fx:id="tabPaneEdicion" tabClosingPolicy="UNAVAILABLE">
+
+                    <Tab fx:id="tabImportar" text="1. Importar Excel">
+                        <HBox spacing="20">
+                            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                            <VBox spacing="15" prefWidth="350">
+                                <Label text="Paso 1: Plantilla" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                                <Label text="Descargue el formato oficial para estructurar sus datos." wrapText="true"/>
+                                <Button text="Descargar Excel de Ejemplo" onAction="#descargarEjemploExcel" styleClass="btn-nav" prefWidth="Infinity"/>
+                                <Separator/>
+                                <Label text="Paso 2: Preparar y Validar" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                                <Label text="Seleccione su Excel crudo para limpiar y buscar choques." wrapText="true"/>
+                                <Button text="Preparar Excel y Buscar Choques" onAction="#prepararExcelCrudo" styleClass="btn-action" style="-fx-background-color: #2980b9;" prefWidth="Infinity"/>
+                                <Separator/>
+                                <Label text="Paso 3: Inyectar a Base de Datos" style="-fx-font-size: 16px; -fx-font-weight: bofld;"/>
+                                <Button text="Extraer y Llenar Base de Datos" onAction="#extraerEInyectarDatos" styleClass="btn-action" style="-fx-background-color: #27ae60;" prefWidth="Infinity"/>
+                            </VBox>
+                            <Separator orientation="VERTICAL"/>
+                            <VBox spacing="10" HBox.hgrow="ALWAYS">
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <Label text="Consola de Procesamiento:" style="-fx-font-weight: bold;"/>
+                                    <ProgressIndicator fx:id="progressExcel" visible="false" prefWidth="20" prefHeight="20"/>
+                                </HBox>
+                                <TextArea fx:id="txtConsolaExcel" editable="false" VBox.vgrow="ALWAYS"
+                                          style="-fx-font-family: 'Consolas'; -fx-control-inner-background: #1e1e1e; -fx-text-fill: #a6e22e;"/>
+                            </VBox>
+                        </HBox>
+                    </Tab>
+
+                    <Tab fx:id="tabHorarios" text="2. Horarios">
+                        <VBox spacing="10">
+                            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                            <HBox spacing="15" alignment="CENTER_LEFT">
+                                <TextField fx:id="txtBuscarMateria" promptText="🔍 Buscar Materia..." prefWidth="150"/>
+                                <TextField fx:id="txtBuscarDocente" promptText="🔍 Buscar Docente..." prefWidth="150"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label text="Doble clic para eliminar o editar horarios" style="-fx-text-fill: #7f8c8d; -fx-cursor: hand;">
+<!--                                    <tooltip><Tooltip text="Dé doble clic sobre el bloque de horas en la tabla y seleccione 'Eliminar Horario'"/></tooltip>-->
+                                </Label>
+                                <Button text="+ Registrar Nuevo Horario" onAction="#abrirModalNuevoHorario" styleClass="btn-action" style="-fx-background-color: #2980b9;"/>
+                            </HBox>
+                            <TableView fx:id="tablaHorarios" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colMateria" text="Materia" prefWidth="150"/>
+                                    <TableColumn fx:id="colDocente" text="Docente" prefWidth="150"/>
+                                    <TableColumn fx:id="colParalelo" text="Paralelo" prefWidth="60"/>
+                                    <TableColumn fx:id="colMatriculados" text="Est. Mat." prefWidth="60"/>
+                                    <TableColumn fx:id="colAula" text="Aula Asignada" prefWidth="120"/>
+                                    <TableColumn fx:id="colTipoReq" text="Tipo Req." prefWidth="90"/>
+                                    <TableColumn fx:id="colCapacidad" text="Cap." prefWidth="50"/>
+                                    <TableColumn fx:id="colLunes" text="Lunes" prefWidth="80"/>
+                                    <TableColumn fx:id="colMartes" text="Martes" prefWidth="80"/>
+                                    <TableColumn fx:id="colMiercoles" text="Miércoles" prefWidth="80"/>
+                                    <TableColumn fx:id="colJueves" text="Jueves" prefWidth="80"/>
+                                    <TableColumn fx:id="colViernes" text="Viernes" prefWidth="80"/>
+                                    <TableColumn fx:id="colSabado" text="Sábado" prefWidth="80"/>
+                                </columns>
+                            </TableView>
+                        </VBox>
+                    </Tab>
+
+                    <Tab fx:id="tabParalelos" text="3. Paralelos">
+                        <VBox spacing="10">
+                            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                            <HBox spacing="15" alignment="CENTER_LEFT">
+                                <TextField fx:id="txtBuscarParaleloMat" promptText="🔍 Buscar Materia..." prefWidth="150"/>
+                                <TextField fx:id="txtBuscarParaleloDoc" promptText="🔍 Buscar Docente..." prefWidth="150"/>
+                                <TextField fx:id="txtBuscarParaleloNom" promptText="🔍 Buscar Paralelo..." prefWidth="150"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button text="- Eliminar Seleccionado" onAction="#eliminarParalelo" style="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>
+                                <Button text="+ Registrar Nuevo Paralelo" onAction="#abrirModalNuevoParalelo" styleClass="btn-action" style="-fx-background-color: #2980b9;"/>
+                            </HBox>
+                            <TableView fx:id="tablaParalelos" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colParaleloMat" text="Materia" prefWidth="250"/>
+                                    <TableColumn fx:id="colParaleloDoc" text="Docente" prefWidth="250"/>
+                                    <TableColumn fx:id="colParaleloNom" text="Paralelo (Ej. GR1)" prefWidth="120"/>
+                                    <TableColumn fx:id="colParaleloEst" text="Est. Matriculados" prefWidth="120"/>
+                                </columns>
+                            </TableView>
+                        </VBox>
+                    </Tab>
+
+                    <Tab fx:id="tabMaterias" text="4. Materias">
+                        <VBox spacing="10">
+                            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                            <HBox spacing="15" alignment="CENTER_LEFT">
+                                <TextField fx:id="txtBuscarMateriaNom" promptText="🔍 Buscar Materia..." prefWidth="200"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button text="- Eliminar Seleccionado" onAction="#eliminarMateria" style="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>
+                                <Button text="+ Registrar Nueva Materia" onAction="#abrirModalNuevaMateria" styleClass="btn-action" style="-fx-background-color: #2980b9;"/>
+                            </HBox>
+                            <TableView fx:id="tablaMaterias" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colMatCodigo" text="Código" prefWidth="100"/>
+                                    <TableColumn fx:id="colMatNombre" text="Nombre de Materia" prefWidth="250"/>
+                                    <TableColumn fx:id="colMatSemestre" text="Semestre" prefWidth="80"/>
+                                    <TableColumn fx:id="colMatCreditos" text="Créditos" prefWidth="80"/>
+                                    <TableColumn fx:id="colMatHoras" text="Horas" prefWidth="80"/>
+                                    <TableColumn fx:id="colMatDepto" text="Departamento" prefWidth="150"/>
+                                    <TableColumn fx:id="colMatTipo" text="Aula Req." prefWidth="120"/>
+                                </columns>
+                            </TableView>
+                        </VBox>
+                    </Tab>
+
+                    <Tab fx:id="tabDocentes" text="5. Docentes">
+                        <VBox spacing="10">
+                            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                            <HBox spacing="15" alignment="CENTER_LEFT">
+                                <TextField fx:id="txtBuscarDocenteNom" promptText="🔍 Buscar Docente..." prefWidth="200"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button text="- Eliminar Seleccionado" onAction="#eliminarDocente" style="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>
+                                <Button text="+ Registrar Nuevo Docente" onAction="#abrirModalNuevoDocente" styleClass="btn-action" style="-fx-background-color: #2980b9;"/>
+                            </HBox>
+                            <TableView fx:id="tablaDocentes" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colDocNombre" text="Nombre del Docente" prefWidth="300"/>
+                                    <TableColumn fx:id="colDocPizarra" text="¿Cualquier Pizarra?" prefWidth="150"/>
+                                </columns>
+                            </TableView>
+                        </VBox>
+                    </Tab>
+
+                    <Tab fx:id="tabAulas" text="6. Aulas">
+                        <VBox spacing="10">
+                            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                            <HBox spacing="15" alignment="CENTER_LEFT">
+                                <TextField fx:id="txtBuscarAula" promptText="🔍 Buscar Aula (Ej. E17/P2)..." prefWidth="250"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button text="- Eliminar Seleccionada" onAction="#eliminarAula" style="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>
+                                <Button text="+ Registrar Nueva Aula" onAction="#abrirModalNuevaAula" styleClass="btn-action" style="-fx-background-color: #2980b9;"/>
+                            </HBox>
+                            <TableView fx:id="tablaAulas" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colAulEdificio" text="Edificio" prefWidth="100"/>
+                                    <TableColumn fx:id="colAulPiso" text="Piso" prefWidth="100"/>
+                                    <TableColumn fx:id="colAulNumero" text="Número" prefWidth="100"/>
+                                    <TableColumn fx:id="colAulCapacidad" text="Capacidad" prefWidth="80"/>
+                                    <TableColumn fx:id="colAulTipo" text="Tipo Aula" prefWidth="150"/>
+                                    <TableColumn fx:id="colAulEstado" text="Estado" prefWidth="100"/>
+                                </columns>
+                            </TableView>
+                        </VBox>
+                    </Tab>
+
+                    <Tab fx:id="tabTipos" text="7. Tipos de Aula">
+                        <VBox spacing="10">
+                            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                            <HBox spacing="15" alignment="CENTER_LEFT">
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button text="- Eliminar Seleccionado" onAction="#eliminarTipoAula" style="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>
+                                <Button text="+ Registrar Nuevo Tipo" onAction="#abrirModalNuevoTipo" styleClass="btn-action" style="-fx-background-color: #2980b9;"/>
+                            </HBox>
+                            <TableView fx:id="tablaTiposAulas" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colTipNombre" text="Descripción del Tipo de Aula" prefWidth="400"/>
+                                </columns>
+                            </TableView>
+                        </VBox>
+                    </Tab>
+                </TabPane>
+            </Tab>
+
+            <Tab text="Visor de Aulas (Ocupación)">
+                <BorderPane>
+                    <top>
+                        <HBox spacing="15" alignment="CENTER_LEFT" style="-fx-padding: 15px; -fx-background-color: #f4f4f4; -fx-border-color: #ddd; -fx-border-width: 0 0 1 0;">
+                            <Label text="Filtrar Edificio:" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="comboFiltroEdificio" prefWidth="150"/>
+
+                            <CheckBox fx:id="chkSoloOcupadas" text="Ocultar aulas vacías" selected="true" style="-fx-font-weight: bold;"/>
+
+                            <Region HBox.hgrow="ALWAYS"/>
+
+                            <Label text="Ordenar por:" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="comboOrdenOcupacion" prefWidth="250"/>
+
+                            <Button text="Exportar Excel" onAction="#exportarExcelVisor" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                            <Button text="🔄 Actualizar Vista" onAction="#cargarDatosVisorAulas" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                        </HBox>
+                    </top>
+                    <center>
+                        <TableView fx:id="tablaVisorAulas" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colVisAula" text="AULA" prefWidth="120" style="-fx-alignment: CENTER; -fx-font-weight: bold; -fx-background-color: #ecf0f1;"/>
+                                <TableColumn fx:id="colVisLun" text="Lunes" prefWidth="220"/>
+                                <TableColumn fx:id="colVisMar" text="Martes" prefWidth="220"/>
+                                <TableColumn fx:id="colVisMie" text="Miércoles" prefWidth="220"/>
+                                <TableColumn fx:id="colVisJue" text="Jueves" prefWidth="220"/>
+                                <TableColumn fx:id="colVisVie" text="Viernes" prefWidth="220"/>
+                            </columns>
+                        </TableView>
+                    </center>
+                </BorderPane>
+            </Tab>
+
+        </TabPane>
+    </center>
+</BorderPane>

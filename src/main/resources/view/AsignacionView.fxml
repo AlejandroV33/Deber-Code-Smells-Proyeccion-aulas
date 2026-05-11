@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="15" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="app.controller.AsignacionController"
+      prefWidth="700" prefHeight="500" style="-fx-background-color: #f4f4f4;">
+
+    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+    <Label text="Asignación Inteligente de Aulas" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+    <HBox spacing="15" alignment="CENTER_LEFT">
+        <Button text="Limpiar Asignaciones" onAction="#limpiarAulas" style="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>
+        <Button fx:id="btnAsignar" text="Ejecutar Algoritmo (Mejor de 3)" onAction="#ejecutarAlgoritmo" styleClass="btn-action" style="-fx-background-color: #27ae60;"/>
+        <Button text="Exportar Excel" onAction="#exportarExcel" styleClass="btn-nav"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <ProgressIndicator fx:id="progressIndicator" visible="false" prefWidth="25" prefHeight="25"/>
+    </HBox>
+
+    <Label text="Consola de Procesos:" style="-fx-font-weight: bold;"/>
+    <TextArea fx:id="txtConsola" VBox.vgrow="ALWAYS" editable="false"
+              style="-fx-font-family: 'Consolas'; -fx-control-inner-background: #1e1e1e; -fx-text-fill: #a6e22e;"/>
+</VBox>

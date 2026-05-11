@@ -1,0 +1,85 @@
+@startuml
+title Diagrama Relacional Actualizado - proyeccion_facultad.db
+
+skinparam linetype ortho
+skinparam entityStyle rectangle
+skinparam shadowing false
+
+top to bottom direction
+
+entity materias {
+  +id : INTEGER <<PK>>
+  --
+  codigo : TEXT NOT NULL
+  nombre : TEXT NOT NULL
+  departamento : TEXT
+  creditos : INTEGER
+  horas : INTEGER
+  semestre : INTEGER NOT NULL
+  aula_requerida : INTEGER NOT NULL DEFAULT 1 <<FK>>
+}
+
+entity docentes {
+  +id : INTEGER <<PK>>
+  --
+  nombre : TEXT NOT NULL
+  cualquier_pizarra : TEXT NOT NULL DEFAULT 'si'
+}
+
+entity tipos_aulas {
+  +id : INTEGER <<PK>>
+  --
+  nombre : TEXT NOT NULL UNIQUE
+}
+
+entity aulas {
+  +id : INTEGER <<PK>>
+  --
+  edificio : TEXT NOT NULL
+  piso : TEXT NOT NULL
+  numero : TEXT NOT NULL
+  capacidad : INTEGER
+  estado : TEXT NOT NULL DEFAULT 'activo'
+  disponibilidad : TEXT NOT NULL DEFAULT 'libre'
+  proporcion_ocupacion : TEXT
+  indice_ocupacion : REAL
+  indice_ajuste_ocupacion : REAL
+  id_tipo_aula : INTEGER NOT NULL DEFAULT 1 <<FK>>
+}
+
+entity paralelos {
+  +id : INTEGER <<PK>>
+  --
+  nombre : TEXT NOT NULL
+  num_estudiantes_matriculados : INTEGER
+  id_materia : INTEGER NOT NULL <<FK>>
+  id_docente : INTEGER <<FK>>
+  espejo : TEXT NOT NULL DEFAULT 'indiferente'
+}
+
+entity horarios {
+  +id : INTEGER <<PK>>
+  --
+  dia : TEXT NOT NULL
+  hora_inicio : INTEGER NOT NULL
+  hora_fin : INTEGER NOT NULL
+  id_paralelo : INTEGER NOT NULL <<FK>>
+  id_aula : INTEGER <<FK>>
+}
+
+entity resultado_final_total {
+  <<VIEW>>
+}
+
+' =========================
+' Relaciones
+' =========================
+
+materias ||--o{ paralelos : "1:N (CASCADE)"
+docentes ||--o{ paralelos : "1:N (SET NULL)"
+paralelos ||--o{ horarios : "1:N (CASCADE)"
+aulas ||--o{ horarios : "1:N (SET NULL)"
+tipos_aulas ||--o{ aulas : "1:N (SET DEFAULT)"
+tipos_aulas ||--o{ materias : "1:N (SET DEFAULT)"
+
+@enduml

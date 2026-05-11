@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="app.controller.MainController"
+            styleClass="main-container">
+
+    <top>
+        <VBox spacing="10" styleClass="top-bar">
+            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="FIQA - Proyección de Aulas" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <TextField fx:id="txtBuscarMateria" promptText="🔍 Buscar por Materia..." prefWidth="250"/>
+                <TextField fx:id="txtBuscarDocente" promptText="🔍 Buscar por Docente..." prefWidth="250"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Asignar Aulas" onAction="#abrirAsignacion" styleClass="btn-action" style="-fx-background-color: #27ae60;"/>
+                <Button text="Exportar Excel" onAction="#exportarExcel" styleClass="btn-action"/>
+                <Button text="Editar Registros" onAction="#irGestion" styleClass="btn-nav"/>
+                <Button text="↻ Recargar Datos" onAction="#cargarDatos" styleClass="btn-nav"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <TableView fx:id="tablaResultados" styleClass="main-table">
+            <columns>
+                <TableColumn fx:id="colMateria" text="Materia" prefWidth="200"/>
+                <TableColumn fx:id="colSemestre" text="Sem." prefWidth="50"/>
+                <TableColumn fx:id="colParalelo" text="Paralelo" prefWidth="80"/>
+                <TableColumn fx:id="colCupos" text="Matriculados" prefWidth="60"/>
+                <TableColumn fx:id="colDocente" text="Docente" prefWidth="200"/>
+                <TableColumn fx:id="colAula" text="Aula Asignada" prefWidth="120"/>
+                <TableColumn fx:id="colTipoAula" text="Aula Req." prefWidth="100"/>
+                <TableColumn fx:id="colLunes" text="Lunes" prefWidth="100"/>
+                <TableColumn fx:id="colMartes" text="Martes" prefWidth="100"/>
+                <TableColumn fx:id="colMiercoles" text="Miércoles" prefWidth="100"/>
+                <TableColumn fx:id="colJueves" text="Jueves" prefWidth="100"/>
+                <TableColumn fx:id="colViernes" text="Viernes" prefWidth="100"/>
+            </columns>
+        </TableView>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER_LEFT" styleClass="status-bar">
+            <padding><Insets top="5" bottom="5" left="10" right="10"/></padding>
+            <Label fx:id="lblEstado" text="Registros cargados correctamente."/>
+        </HBox>
+    </bottom>
+
+</BorderPane>
