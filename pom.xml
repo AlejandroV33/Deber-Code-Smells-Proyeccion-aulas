@@ -12,7 +12,7 @@
     <properties>
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
-        <javafx.version>25-ea+1</javafx.version>
+        <javafx.version>21</javafx.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -29,7 +29,17 @@
             <artifactId>poi-ooxml</artifactId>
             <version>5.2.5</version>
         </dependency>
-    </dependencies>
+        <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-controls</artifactId>
+        <version>21</version>
+    </dependency>
+    <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-fxml</artifactId>
+        <version>21</version>
+    </dependency>
+</dependencies>
 
     <build>
         <plugins>
@@ -104,7 +114,17 @@
                     <version>${javafx.version}</version>
                     <classifier>mac-aarch64</classifier>
                 </dependency>
-            </dependencies>
+                <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-controls</artifactId>
+        <version>21</version>
+    </dependency>
+    <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-fxml</artifactId>
+        <version>21</version>
+    </dependency>
+</dependencies>
         </profile>
 
         <!-- Ubuntu / Linux x86_64 -->
@@ -129,7 +149,17 @@
                     <version>${javafx.version}</version>
                     <classifier>linux</classifier>
                 </dependency>
-            </dependencies>
+                <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-controls</artifactId>
+        <version>21</version>
+    </dependency>
+    <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-fxml</artifactId>
+        <version>21</version>
+    </dependency>
+</dependencies>
         </profile>
 
         <!-- Windows x86_64 -->
@@ -154,7 +184,17 @@
                     <version>${javafx.version}</version>
                     <classifier>win</classifier>
                 </dependency>
-            </dependencies>
+                <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-controls</artifactId>
+        <version>21</version>
+    </dependency>
+    <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-fxml</artifactId>
+        <version>21</version>
+    </dependency>
+</dependencies>
         </profile>
     </profiles>
 
