@@ -12,7 +12,7 @@ public class AulaDAO extends BaseDAO {
 
     public List<Aula> listar() {
         List<Aula> lista = new ArrayList<>();
-        String sql = "SELECT * FROM aulas ORDER BY edificio, numero";
+        String sql = "SELECT id, edificio, piso, numero, capacidad, estado, disponibilidad, id_tipo_aula FROM aulas ORDER BY edificio, numero";
 
         try (PreparedStatement stmt = getConnection().prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {

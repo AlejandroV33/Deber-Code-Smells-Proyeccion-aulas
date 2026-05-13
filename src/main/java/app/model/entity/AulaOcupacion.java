@@ -80,6 +80,7 @@ public class AulaOcupacion {
             case "miercoles": miercoles.add(texto); horasMiercoles += duracion; break;
             case "jueves": jueves.add(texto); horasJueves += duracion; break;
             case "viernes": viernes.add(texto); horasViernes += duracion; break;
+            default: throw new IllegalArgumentException("Día no reconocido: " + dia);
         }
 
         bloques.add(new Bloque(dia, inicio, fin, materia, paralelo, docenteFormateado));

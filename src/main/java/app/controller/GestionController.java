@@ -947,8 +947,11 @@ public class GestionController {
     public void extraerEInyectarDatos() {
         // 1. ALERTA DE ADVERTENCIA CRÍTICA
         Alert advertencia = new Alert(Alert.AlertType.WARNING,
-                "ATENCIÓN: Esta acción borrará todos los horarios, paralelos y docentes actuales de la base de datos " +
-                        "para reemplazarlos por los datos del archivo Excel.\n\n¿Desea hacer un respaldo de su base de datos actual antes de continuar?",
+                """
+                ATENCIÓN: Esta acción borrará todos los horarios, paralelos y docentes actuales de la base de datos \
+                para reemplazarlos por los datos del archivo Excel.
+
+                ¿Desea hacer un respaldo de su base de datos actual antes de continuar?""",
                 ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
         advertencia.setTitle("Precaución: Reescritura de Base de Datos");
 
