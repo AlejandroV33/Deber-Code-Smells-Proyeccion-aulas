@@ -37,7 +37,7 @@ public class SimulatedAnnealingService {
         List<HorarioDTO> comunes = new ArrayList<>();
 
         for (HorarioDTO h : todosHorarios) {
-            if (esComun(h.nombreTipoAula)) comunes.add(h);
+            if (esComun(h.getNombreTipoAula())) comunes.add(h);
             else especiales.add(h);
         }
 
@@ -60,7 +60,7 @@ public class SimulatedAnnealingService {
             logger.accept("> ejecutando intento " + intento + "...");
 
             // limpiar asignaciones comunes en memoria para este intento
-            for (HorarioDTO h : comunes) h.idAulaAsignada = null;
+            for (HorarioDTO h : comunes) h.setIdAulaAsignada(null);
 
 //            double energiaFinal = ejecutarUnIntentoAnnealing(comunes, aulasComunes, todasAulas);
             double energiaFinal = ejecutarUnIntentoAnnealing(comunes, todosHorarios, aulasComunes, todasAulas);
@@ -70,7 +70,7 @@ public class SimulatedAnnealingService {
                 mejorEnergiaGlobal = energiaFinal;
                 // guardar mapa de la mejor configuracion
                 for (HorarioDTO h : comunes) {
-                    mejorConfiguracion.put(h.id, h.idAulaAsignada);
+                    mejorConfiguracion.put(h.getId(), h.getIdAulaAsignada());
                 }
             }
         }
@@ -79,7 +79,7 @@ public class SimulatedAnnealingService {
 
         // aplicar la mejor configuracion a los objetos en memoria
         for (HorarioDTO h : comunes) {
-            h.idAulaAsignada = mejorConfiguracion.get(h.id);
+            h.setIdAulaAsignada(mejorConfiguracion.get(h.getId()));
         }
 
         // guardar todo en bd
@@ -98,14 +98,14 @@ public class SimulatedAnnealingService {
             double menorCosto = Double.MAX_VALUE;
 
             List<Aula> candidatas = aulas.stream()
-                    .filter(a -> a.getIdTipoAula() == h.idTipoAulaReq)
-                    .filter(a -> a.getCapacidadFlexible() >= h.matriculados)
+                    .filter(a -> a.getIdTipoAula() == h.getIdTipoAulaReq())
+                    .filter(a -> a.getCapacidadFlexible() >= h.getMatriculados())
                     .toList();
 
             for (Aula a : candidatas) {
                 if (estaOcupada(a.getId(), h, horarios)) continue;
 
-                double costo = OptimizationMetrics.calcularIndiceAjuste(h.matriculados, a.getCapacidad());
+                double costo = OptimizationMetrics.calcularIndiceAjuste(h.getMatriculados(), a.getCapacidad());
                 if (costo < menorCosto) {
                     menorCosto = costo;
                     mejorAula = a;
@@ -113,12 +113,12 @@ public class SimulatedAnnealingService {
             }
 
             if (mejorAula != null) {
-                h.idAulaAsignada = mejorAula.getId();
+                h.setIdAulaAsignada(mejorAula.getId());
             } else {
 //                logger.accept(String.format("alerta (sin aula especial): dia: %s, hora: %d-%d, paralelo: %s, matriculados: %d, materia: %s, docente: %s, tipo req: %s",
-//                        h.dia, h.horaInicio, h.horaFin, h.paralelo, h.matriculados, h.materia, h.docente, h.nombreTipoAula));
+//                        h.getDia(), h.getHoraInicio(), h.getHoraFin(), h.getParalelo(), h.getMatriculados(), h.getMateria(), h.getDocente(), h.getNombreTipoAula()));
                 logger.accept(String.format("alerta (sin aula especial) para el horario: | %s | %s | %s | %s | %d-%d | matriculados: %d | tipo de aula requerida: %s",
-                        h.docente, h.materia, h.paralelo, h.dia, h.horaInicio, h.horaFin, h.matriculados, h.nombreTipoAula));
+                        h.getDocente(), h.getMateria(), h.getParalelo(), h.getDia(), h.getHoraInicio(), h.getHoraFin(), h.getMatriculados(), h.getNombreTipoAula()));
             }
         }
     }
@@ -135,16 +135,16 @@ public class SimulatedAnnealingService {
             for (int i = 0; i < ITERACIONES_POR_TEMP; i++) {
                 int idx = rand.nextInt(comunes.size());
                 HorarioDTO h = comunes.get(idx);
-                Integer aulaOriginal = h.idAulaAsignada;
+                Integer aulaOriginal = h.getIdAulaAsignada();
 
                 Aula nuevaAula = aulasComunes.get(rand.nextInt(aulasComunes.size()));
 
-                if (nuevaAula.getCapacidad() < h.matriculados) continue;
+                if (nuevaAula.getCapacidad() < h.getMatriculados()) continue;
 
-                h.idAulaAsignada = nuevaAula.getId();
+                h.setIdAulaAsignada(nuevaAula.getId());
 
                 if (hayColision(h, comunes)) { // Colisiones se buscan solo en comunes
-                    h.idAulaAsignada = aulaOriginal;
+                    h.setIdAulaAsignada(aulaOriginal);
                     continue;
                 }
 
@@ -157,7 +157,7 @@ public class SimulatedAnnealingService {
                     if (Math.exp(-delta / temperatura) > rand.nextDouble()) {
                         energiaActual = nuevaEnergia;
                     } else {
-                        h.idAulaAsignada = aulaOriginal;
+                        h.setIdAulaAsignada(aulaOriginal);
                     }
                 }
             }
@@ -168,16 +168,16 @@ public class SimulatedAnnealingService {
 
     private void generarSolucionInicial(List<HorarioDTO> horarios, List<Aula> aulas) {
         for (HorarioDTO h : horarios) {
-            List<Aula> validas = aulas.stream()
-                    .filter(a -> a.getCapacidadFlexible() >= h.matriculados)
+                List<Aula> validas = aulas.stream()
+                    .filter(a -> a.getCapacidadFlexible() >= h.getMatriculados())
                     .collect(Collectors.toList());
 
             Collections.shuffle(validas);
 
             for (Aula a : validas) {
-                h.idAulaAsignada = a.getId();
+                h.setIdAulaAsignada(a.getId());
                 if (!hayColision(h, horarios)) break;
-                h.idAulaAsignada = null;
+                h.setIdAulaAsignada(null);
             }
         }
     }
@@ -191,13 +191,13 @@ public class SimulatedAnnealingService {
         Map<Integer, Aula> mapAulas = aulasMap.stream().collect(Collectors.toMap(Aula::getId, a -> a));
 
         for (HorarioDTO h : todosHorarios) {
-            if (h.idAulaAsignada == null) {
-                if(esComun(h.nombreTipoAula)) energiaOcupacion += 10.0;
+            if (h.getIdAulaAsignada() == null) {
+                if(esComun(h.getNombreTipoAula())) energiaOcupacion += 10.0;
                 continue;
             }
 
-            Aula a = mapAulas.get(h.idAulaAsignada);
-            energiaOcupacion += OptimizationMetrics.calcularIndiceAjuste(h.matriculados, a.getCapacidad());
+            Aula a = mapAulas.get(h.getIdAulaAsignada());
+            energiaOcupacion += OptimizationMetrics.calcularIndiceAjuste(h.getMatriculados(), a.getCapacidad());
             energiaDistanciaEst += calcularDistanciaEstudiantes(h, todosHorarios, mapAulas);
             energiaDistanciaDoc += calcularDistanciaDocentes(h, todosHorarios, mapAulas);
             asignados++;
@@ -222,22 +222,22 @@ public class SimulatedAnnealingService {
 
         // Agrupar horarios por docente (ignorando vacíos)
         Map<String, List<HorarioDTO>> porDocente = todosHorarios.stream()
-                .filter(h -> h.docente != null && !h.docente.equalsIgnoreCase("Sin profesor") && h.idAulaAsignada != null)
-                .collect(Collectors.groupingBy(h -> h.docente));
+            .filter(h -> h.getDocente() != null && !h.getDocente().equalsIgnoreCase("Sin profesor") && h.getIdAulaAsignada() != null)
+            .collect(Collectors.groupingBy(HorarioDTO::getDocente));
 
         for (List<HorarioDTO> horDocente : porDocente.values()) {
             List<HorarioDTO> especiales = new ArrayList<>();
             List<HorarioDTO> comunes = new ArrayList<>();
 
             for(HorarioDTO h : horDocente) {
-                if(esComun(h.nombreTipoAula)) comunes.add(h);
+                if(esComun(h.getNombreTipoAula())) comunes.add(h);
                 else especiales.add(h);
             }
 
             if (comunes.isEmpty()) continue;
 
-            Map<String, List<HorarioDTO>> comunesPorMateria = comunes.stream()
-                    .collect(Collectors.groupingBy(h -> h.materia));
+                Map<String, List<HorarioDTO>> comunesPorMateria = comunes.stream()
+                    .collect(Collectors.groupingBy(HorarioDTO::getMateria));
 
             Set<String> pisosDeTodasLasMaterias = new HashSet<>();
 
@@ -245,7 +245,7 @@ public class SimulatedAnnealingService {
             for (List<HorarioDTO> horariosMateria : comunesPorMateria.values()) {
                 Set<String> pisosDeEstaMateria = new HashSet<>();
                 for (HorarioDTO h : horariosMateria) {
-                    Aula a = mapAulas.get(h.idAulaAsignada);
+                    Aula a = mapAulas.get(h.getIdAulaAsignada());
                     pisosDeEstaMateria.add(a.getEdificio() + "|" + a.getPiso());
                 }
 
@@ -260,7 +260,7 @@ public class SimulatedAnnealingService {
             if (!especiales.isEmpty()) {
                 Set<String> pisosLaboratorios = new HashSet<>();
                 for (HorarioDTO h : especiales) {
-                    Aula a = mapAulas.get(h.idAulaAsignada);
+                    Aula a = mapAulas.get(h.getIdAulaAsignada());
                     pisosLaboratorios.add(a.getEdificio() + "|" + a.getPiso());
                 }
 
@@ -287,10 +287,10 @@ public class SimulatedAnnealingService {
     private double calcularDistanciaEstudiantes(HorarioDTO actual, List<HorarioDTO> todos, Map<Integer, Aula> aulas) {
         double penalizacion = 0;
         for (HorarioDTO otro : todos) {
-            if (otro == actual || otro.semestre != actual.semestre || otro.idAulaAsignada == null || !otro.dia.equals(actual.dia)) continue;
-            if (otro.horaFin == actual.horaInicio) {
-                Aula a1 = aulas.get(otro.idAulaAsignada);
-                Aula a2 = aulas.get(actual.idAulaAsignada);
+            if (otro == actual || otro.getSemestre() != actual.getSemestre() || otro.getIdAulaAsignada() == null || !otro.getDia().equals(actual.getDia())) continue;
+            if (otro.getHoraFin() == actual.getHoraInicio()) {
+                Aula a1 = aulas.get(otro.getIdAulaAsignada());
+                Aula a2 = aulas.get(actual.getIdAulaAsignada());
                 penalizacion += OptimizationMetrics.calcularPenalizacionDistancia(a1.getEdificio(), a2.getEdificio());
             }
         }
@@ -298,16 +298,16 @@ public class SimulatedAnnealingService {
     }
 
     private double calcularDistanciaDocentes(HorarioDTO actual, List<HorarioDTO> todos, Map<Integer, Aula> aulas) {
-        if (actual.docente == null || actual.docente.equalsIgnoreCase("Sin profesor") || actual.docente.isEmpty()) return 0;
+        if (actual.getDocente() == null || actual.getDocente().equalsIgnoreCase("Sin profesor") || actual.getDocente().isEmpty()) return 0;
 
         double penalizacion = 0;
         for (HorarioDTO otro : todos) {
-            if (otro == actual || otro.idAulaAsignada == null || !otro.dia.equals(actual.dia)) continue;
+            if (otro == actual || otro.getIdAulaAsignada() == null || !otro.getDia().equals(actual.getDia())) continue;
 
             // Si tiene clases seguidas
-            if (otro.horaFin == actual.horaInicio && actual.docente.equals(otro.docente)) {
-                Aula a1 = aulas.get(otro.idAulaAsignada);
-                Aula a2 = aulas.get(actual.idAulaAsignada);
+            if (otro.getHoraFin() == actual.getHoraInicio() && actual.getDocente().equals(otro.getDocente())) {
+                Aula a1 = aulas.get(otro.getIdAulaAsignada());
+                Aula a2 = aulas.get(actual.getIdAulaAsignada());
 
                 if (a1.getId() == a2.getId()) {
                     penalizacion += 0; // Ideal: No se mueve
@@ -391,16 +391,16 @@ public class SimulatedAnnealingService {
     private boolean estaOcupada(int idAula, HorarioDTO actual, List<HorarioDTO> lista) {
         for (HorarioDTO h : lista) {
             if (h == actual) continue;
-            if (h.idAulaAsignada != null && h.idAulaAsignada == idAula && h.dia.equals(actual.dia)) {
-                if (actual.horaInicio < h.horaFin && actual.horaFin > h.horaInicio) return true;
+            if (h.getIdAulaAsignada() != null && h.getIdAulaAsignada() == idAula && h.getDia().equals(actual.getDia())) {
+                if (actual.getHoraInicio() < h.getHoraFin() && actual.getHoraFin() > h.getHoraInicio()) return true;
             }
         }
         return false;
     }
 
     private boolean hayColision(HorarioDTO actual, List<HorarioDTO> lista) {
-        if (actual.idAulaAsignada == null) return false;
-        return estaOcupada(actual.idAulaAsignada, actual, lista);
+        if (actual.getIdAulaAsignada() == null) return false;
+        return estaOcupada(actual.getIdAulaAsignada(), actual, lista);
     }
 
     private void guardarResultados(List<HorarioDTO> horarios, List<Aula> aulas, Consumer<String> logger) {
@@ -408,13 +408,13 @@ public class SimulatedAnnealingService {
         Map<Integer, Aula> mapAulas = aulas.stream().collect(Collectors.toMap(Aula::getId, a -> a));
 
         for (HorarioDTO h : horarios) {
-            if (h.idAulaAsignada != null) {
-                Aula a = mapAulas.get(h.idAulaAsignada);
-                String prop = h.matriculados + "/" + a.getCapacidad();
-                double idxOcup = (double) h.matriculados / a.getCapacidad();
-                double idxAjuste = OptimizationMetrics.calcularIndiceAjuste(h.matriculados, a.getCapacidad());
+            if (h.getIdAulaAsignada() != null) {
+                Aula a = mapAulas.get(h.getIdAulaAsignada());
+                String prop = h.getMatriculados() + "/" + a.getCapacidad();
+                double idxOcup = (double) h.getMatriculados() / a.getCapacidad();
+                double idxAjuste = OptimizationMetrics.calcularIndiceAjuste(h.getMatriculados(), a.getCapacidad());
 
-                horarioDAO.actualizarAsignacion(h.id, h.idAulaAsignada, prop, idxOcup, idxAjuste);
+                horarioDAO.actualizarAsignacion(h.getId(), h.getIdAulaAsignada(), prop, idxOcup, idxAjuste);
             }
         }
         logger.accept(">> guardado completo y exitoso.");

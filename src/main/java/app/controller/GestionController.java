@@ -662,69 +662,219 @@ public class GestionController {
     @FXML
     public void abrirModalNuevaMateria() { abrirEditorMateria(new app.model.entity.MateriaFila()); }
 
+    /**
+     * Abre el diálogo para crear o editar una materia.
+     * Refactorizado con Extract Function para reducir complejidad cognitiva.
+     * 
+     * @param m la materia a editar (ID=0 para nueva materia)
+     */
     private void abrirEditorMateria(app.model.entity.MateriaFila m) {
         Dialog<Boolean> dialog = new Dialog<>();
-        dialog.setTitle(m.getId() == 0 ? "Nueva Materia" : "Editar Materia");
+        dialog.setTitle(determinarTituloDialogoMateria(m));
 
+        // 1. Crear todos los controles del formulario
+        java.util.Map<String, Object> controles = crearYConfigurarControlesMateria(m);
+
+        // 2. Construir el grid con los controles
+        GridPane grid = construirGridFormularioMateria(controles);
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        // 3. Configurar el resultado del diálogo
+        configurarResultadoDialogoMateria(dialog, m, controles);
+
+        dialog.showAndWait().ifPresent(guardoExito -> {
+            if (guardoExito) {
+                cargarMaterias(); // Refresca la tabla
+            }
+        });
+    }
+
+    /**
+     * Determina si es nueva materia o edición basado en el ID.
+     * Extracción de condicional: Decompose Conditional
+     */
+    private String determinarTituloDialogoMateria(app.model.entity.MateriaFila m) {
+        return m.getId() == 0 ? "Nueva Materia" : "Editar Materia";
+    }
+
+    /**
+     * Crea y configura todos los controles (TextFields, Spinners, ComboBox) del formulario.
+     * Retorna un Map con claves: txtCodigo, txtNombre, txtDepto, spinCreditos, spinHoras, spinSemestre, comboTipo
+     */
+    private java.util.Map<String, Object> crearYConfigurarControlesMateria(app.model.entity.MateriaFila m) {
+        java.util.Map<String, Object> controles = new java.util.HashMap<>();
+
+        // Crear TextFields con valores iniciales
         TextField txtCodigo = new TextField(m.getCodigo() != null ? m.getCodigo() : "");
         TextField txtNombre = new TextField(m.getNombre() != null ? m.getNombre() : "");
         TextField txtDepto = new TextField(m.getDepartamento() != null ? m.getDepartamento() : "");
 
-        // Spinners numéricos configurados desde 0, editables manualmente, con saltos de 1
-        Spinner<Integer> spinCreditos = new Spinner<>(0, 100, m.getId() == 0 ? 0 : m.getCreditos(), 1);
-        spinCreditos.setEditable(true);
-        Spinner<Integer> spinHoras = new Spinner<>(0, 100, m.getId() == 0 ? 0 : m.getHoras(), 1);
-        spinHoras.setEditable(true);
-        Spinner<Integer> spinSemestre = new Spinner<>(0, 20, m.getId() == 0 ? 0 : m.getSemestre(), 1);
-        spinSemestre.setEditable(true);
+        // Crear Spinners de créditos, horas y semestre
+        Spinner<Integer> spinCreditos = crearSpinnerConValorInicial(0, 100, m.getId() == 0 ? 0 : m.getCreditos());
+        Spinner<Integer> spinHoras = crearSpinnerConValorInicial(0, 100, m.getId() == 0 ? 0 : m.getHoras());
+        Spinner<Integer> spinSemestre = crearSpinnerConValorInicial(0, 20, m.getId() == 0 ? 0 : m.getSemestre());
+
+        // Crear ComboBox de tipos de aula
+        ComboBox<app.model.entity.TipoAula> comboTipo = new ComboBox<>(
+            javafx.collections.FXCollections.observableArrayList(tipoAulaDAO.listar())
+        );
+        seleccionarTipoAulaDefault(comboTipo, m);
+
+        // Guardar en el mapa
+        controles.put("txtCodigo", txtCodigo);
+        controles.put("txtNombre", txtNombre);
+        controles.put("txtDepto", txtDepto);
+        controles.put("spinCreditos", spinCreditos);
+        controles.put("spinHoras", spinHoras);
+        controles.put("spinSemestre", spinSemestre);
+        controles.put("comboTipo", comboTipo);
+
+        return controles;
+    }
+
+    /**
+     * Crea un Spinner editable con listener que fuerza guardar el valor al perder foco.
+     * Extracción de lógica repetitiva: Extract Function
+     */
+    private Spinner<Integer> crearSpinnerConValorInicial(int min, int max, int valor) {
+        Spinner<Integer> spinner = new Spinner<>(min, max, valor, 1);
+        spinner.setEditable(true);
 
         // Hack para forzar que JavaFX guarde el valor escrito a mano si no se presiona Enter
-        spinCreditos.focusedProperty().addListener((o, w, isNow) -> { if (!isNow) try { spinCreditos.getValueFactory().setValue(Integer.parseInt(spinCreditos.getEditor().getText())); } catch(Exception e){} });
-        spinHoras.focusedProperty().addListener((o, w, isNow) -> { if (!isNow) try { spinHoras.getValueFactory().setValue(Integer.parseInt(spinHoras.getEditor().getText())); } catch(Exception e){} });
-        spinSemestre.focusedProperty().addListener((o, w, isNow) -> { if (!isNow) try { spinSemestre.getValueFactory().setValue(Integer.parseInt(spinSemestre.getEditor().getText())); } catch(Exception e){} });
+        spinner.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused) {
+                try {
+                    int valorEscrito = Integer.parseInt(spinner.getEditor().getText());
+                    spinner.getValueFactory().setValue(valorEscrito);
+                } catch (NumberFormatException e) {
+                    // Silenciosamente restaurar el valor anterior si hay error
+                }
+            }
+        });
 
-        ComboBox<app.model.entity.TipoAula> comboTipo = new ComboBox<>(javafx.collections.FXCollections.observableArrayList(tipoAulaDAO.listar()));
+        return spinner;
+    }
 
-        // Selección por defecto: COMÚN (id 1) si es nuevo
-        if (m.getId() == 0) {
-            comboTipo.getItems().stream().filter(t -> t.getId() == 1).findFirst().ifPresent(comboTipo.getSelectionModel()::select);
+    /**
+     * Selecciona el tipo de aula por defecto basado en si es nueva o edición.
+     * Extracción de condicional compleja: Decompose Conditional
+     */
+    private void seleccionarTipoAulaDefault(ComboBox<app.model.entity.TipoAula> comboTipo, app.model.entity.MateriaFila m) {
+        if (esMateriaNueva(m)) {
+            // Selección por defecto: COMÚN (id 1) si es nuevo
+            comboTipo.getItems().stream()
+                .filter(t -> t.getId() == 1)
+                .findFirst()
+                .ifPresent(comboTipo.getSelectionModel()::select);
         } else {
-            comboTipo.getItems().stream().filter(t -> t.getId() == m.getIdTipoAulaReq()).findFirst().ifPresent(comboTipo.getSelectionModel()::select);
+            // Para edición, seleccionar el tipo actual
+            comboTipo.getItems().stream()
+                .filter(t -> t.getId() == m.getIdTipoAulaReq())
+                .findFirst()
+                .ifPresent(comboTipo.getSelectionModel()::select);
         }
+    }
 
-        GridPane grid = new GridPane(); grid.setHgap(10); grid.setVgap(10);
-        grid.add(new Label("Código:"), 0, 0); grid.add(txtCodigo, 1, 0);
-        grid.add(new Label("Nombre:"), 0, 1); grid.add(txtNombre, 1, 1);
-        grid.add(new Label("Departamento:"), 0, 2); grid.add(txtDepto, 1, 2);
-        grid.add(new Label("Créditos:"), 0, 3); grid.add(spinCreditos, 1, 3);
-        grid.add(new Label("Horas:"), 0, 4); grid.add(spinHoras, 1, 4);
-        grid.add(new Label("Semestre:"), 0, 5); grid.add(spinSemestre, 1, 5);
-        grid.add(new Label("Aula Req.:"), 0, 6); grid.add(comboTipo, 1, 6);
+    /**
+     * Verifica si la materia es nueva (ID = 0).
+     */
+    private boolean esMateriaNueva(app.model.entity.MateriaFila m) {
+        return m.getId() == 0;
+    }
 
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+    /**
+     * Construye el GridPane con todos los controles del formulario.
+     * Extracción de lógica de UI: Extract Function
+     */
+    private GridPane construirGridFormularioMateria(java.util.Map<String, Object> controles) {
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
 
+        TextField txtCodigo = (TextField) controles.get("txtCodigo");
+        TextField txtNombre = (TextField) controles.get("txtNombre");
+        TextField txtDepto = (TextField) controles.get("txtDepto");
+        Spinner<Integer> spinCreditos = (Spinner<Integer>) controles.get("spinCreditos");
+        Spinner<Integer> spinHoras = (Spinner<Integer>) controles.get("spinHoras");
+        Spinner<Integer> spinSemestre = (Spinner<Integer>) controles.get("spinSemestre");
+        ComboBox<app.model.entity.TipoAula> comboTipo = (ComboBox<app.model.entity.TipoAula>) controles.get("comboTipo");
+
+        // Agregar filas al grid
+        grid.add(new Label("Código:"), 0, 0);
+        grid.add(txtCodigo, 1, 0);
+        grid.add(new Label("Nombre:"), 0, 1);
+        grid.add(txtNombre, 1, 1);
+        grid.add(new Label("Departamento:"), 0, 2);
+        grid.add(txtDepto, 1, 2);
+        grid.add(new Label("Créditos:"), 0, 3);
+        grid.add(spinCreditos, 1, 3);
+        grid.add(new Label("Horas:"), 0, 4);
+        grid.add(spinHoras, 1, 4);
+        grid.add(new Label("Semestre:"), 0, 5);
+        grid.add(spinSemestre, 1, 5);
+        grid.add(new Label("Aula Req.:"), 0, 6);
+        grid.add(comboTipo, 1, 6);
+
+        return grid;
+    }
+
+    /**
+     * Configura el result converter y listener del diálogo de materia.
+     * Extracción de lógica de resultado: Extract Function
+     */
+    private void configurarResultadoDialogoMateria(Dialog<Boolean> dialog, app.model.entity.MateriaFila m, 
+                                                    java.util.Map<String, Object> controles) {
         dialog.setResultConverter(btn -> {
-            if (btn == ButtonType.OK && !txtNombre.getText().trim().isEmpty() && comboTipo.getValue() != null) {
-                m.setCodigo(txtCodigo.getText().trim().toUpperCase());
-                m.setNombre(txtNombre.getText().trim().toUpperCase());
-                m.setDepartamento(txtDepto.getText().trim().toUpperCase());
-                m.setCreditos(spinCreditos.getValue());
-                m.setHoras(spinHoras.getValue());
-                m.setSemestre(spinSemestre.getValue());
-                m.setIdTipoAulaReq(comboTipo.getValue().getId());
-
-                materiaDAO.guardar(m);
+            if (esClickEnOK(btn) && validarDatosFormularioMateria(controles)) {
+                guardarDatosMateria(m, controles);
                 return true;
             }
             return false;
         });
+    }
 
-        dialog.showAndWait().ifPresent(res -> {
-            if(res) {
-                cargarMaterias(); // Refresca la tabla
-            }
-        });
+    /**
+     * Valida que el botón presionado sea OK.
+     * Extracción de condicional simple.
+     */
+    private boolean esClickEnOK(ButtonType btn) {
+        return btn == ButtonType.OK;
+    }
+
+    /**
+     * Valida que los datos requeridos del formulario no estén vacíos.
+     * Extracción de validación compleja: Decompose Conditional
+     */
+    private boolean validarDatosFormularioMateria(java.util.Map<String, Object> controles) {
+        TextField txtNombre = (TextField) controles.get("txtNombre");
+        ComboBox<app.model.entity.TipoAula> comboTipo = (ComboBox<app.model.entity.TipoAula>) controles.get("comboTipo");
+
+        return !txtNombre.getText().trim().isEmpty() && comboTipo.getValue() != null;
+    }
+
+    /**
+     * Guarda los datos de la materia desde los controles del formulario.
+     * Extracción de lógica de guardado: Extract Function
+     */
+    private void guardarDatosMateria(app.model.entity.MateriaFila m, java.util.Map<String, Object> controles) {
+        TextField txtCodigo = (TextField) controles.get("txtCodigo");
+        TextField txtNombre = (TextField) controles.get("txtNombre");
+        TextField txtDepto = (TextField) controles.get("txtDepto");
+        Spinner<Integer> spinCreditos = (Spinner<Integer>) controles.get("spinCreditos");
+        Spinner<Integer> spinHoras = (Spinner<Integer>) controles.get("spinHoras");
+        Spinner<Integer> spinSemestre = (Spinner<Integer>) controles.get("spinSemestre");
+        ComboBox<app.model.entity.TipoAula> comboTipo = (ComboBox<app.model.entity.TipoAula>) controles.get("comboTipo");
+
+        m.setCodigo(txtCodigo.getText().trim().toUpperCase());
+        m.setNombre(txtNombre.getText().trim().toUpperCase());
+        m.setDepartamento(txtDepto.getText().trim().toUpperCase());
+        m.setCreditos(spinCreditos.getValue());
+        m.setHoras(spinHoras.getValue());
+        m.setSemestre(spinSemestre.getValue());
+        m.setIdTipoAulaReq(comboTipo.getValue().getId());
+
+        materiaDAO.guardar(m);
     }
 
     @FXML public void abrirModalNuevoDocente() { abrirEditorDocente(new app.model.entity.Docente()); }

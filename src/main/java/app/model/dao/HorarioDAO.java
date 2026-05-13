@@ -62,20 +62,20 @@ public class HorarioDAO extends BaseDAO {
              ResultSet rs = stmt.executeQuery()) {
 
             while(rs.next()) {
-                HorarioDTO dto = new HorarioDTO();
-                dto.id = rs.getInt("id");
-                dto.dia = rs.getString("dia");
-                dto.horaInicio = rs.getInt("hora_inicio");
-                dto.horaFin = rs.getInt("hora_fin");
-                dto.matriculados = rs.getInt("num_estudiantes_matriculados");
-                dto.idTipoAulaReq = rs.getInt("aula_requerida");
-                dto.nombreTipoAula = rs.getString("nombre_tipo");
-                dto.semestre = rs.getInt("semestre");
-
-                // info para debug
-                dto.paralelo = rs.getString("paralelo_nombre");
-                dto.materia = rs.getString("materia_nombre");
-                dto.docente = rs.getString("docente_nombre") != null ? rs.getString("docente_nombre") : "SIN DOCENTE";
+                HorarioDTO dto = new HorarioDTO(
+                        rs.getInt("id"),
+                        rs.getString("dia"),
+                        rs.getInt("hora_inicio"),
+                        rs.getInt("hora_fin"),
+                        rs.getInt("num_estudiantes_matriculados"),
+                        rs.getInt("aula_requerida"),
+                        rs.getString("nombre_tipo"),
+                        rs.getInt("semestre"),
+                        null,
+                        rs.getString("paralelo_nombre"),
+                        rs.getString("materia_nombre"),
+                        rs.getString("docente_nombre") != null ? rs.getString("docente_nombre") : "SIN DOCENTE"
+                );
 
                 lista.add(dto);
             }
@@ -306,17 +306,86 @@ public class HorarioDAO extends BaseDAO {
 
     // clase interna para transporte de datos
     public static class HorarioDTO {
-        public int id;
-        public String dia;
-        public int horaInicio;
-        public int horaFin;
-        public int matriculados;
-        public int idTipoAulaReq;
-        public String nombreTipoAula;
-        public int semestre;
-        public Integer idAulaAsignada;
-        public String paralelo;
-        public String materia;
-        public String docente;
+        private final int id;
+        private final String dia;
+        private final int horaInicio;
+        private final int horaFin;
+        private final int matriculados;
+        private final int idTipoAulaReq;
+        private final String nombreTipoAula;
+        private final int semestre;
+        private Integer idAulaAsignada;
+        private final String paralelo;
+        private final String materia;
+        private final String docente;
+
+        public HorarioDTO(int id, String dia, int horaInicio, int horaFin, int matriculados,
+                          int idTipoAulaReq, String nombreTipoAula, int semestre,
+                          Integer idAulaAsignada, String paralelo, String materia, String docente) {
+            this.id = id;
+            this.dia = dia;
+            this.horaInicio = horaInicio;
+            this.horaFin = horaFin;
+            this.matriculados = matriculados;
+            this.idTipoAulaReq = idTipoAulaReq;
+            this.nombreTipoAula = nombreTipoAula;
+            this.semestre = semestre;
+            this.idAulaAsignada = idAulaAsignada;
+            this.paralelo = paralelo;
+            this.materia = materia;
+            this.docente = docente;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public String getDia() {
+            return dia;
+        }
+
+        public int getHoraInicio() {
+            return horaInicio;
+        }
+
+        public int getHoraFin() {
+            return horaFin;
+        }
+
+        public int getMatriculados() {
+            return matriculados;
+        }
+
+        public int getIdTipoAulaReq() {
+            return idTipoAulaReq;
+        }
+
+        public String getNombreTipoAula() {
+            return nombreTipoAula;
+        }
+
+        public int getSemestre() {
+            return semestre;
+        }
+
+        public Integer getIdAulaAsignada() {
+            return idAulaAsignada;
+        }
+
+        public void setIdAulaAsignada(Integer idAulaAsignada) {
+            this.idAulaAsignada = idAulaAsignada;
+        }
+
+        public String getParalelo() {
+            return paralelo;
+        }
+
+        public String getMateria() {
+            return materia;
+        }
+
+        public String getDocente() {
+            return docente;
+        }
     }
 }
