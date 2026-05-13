@@ -1,14 +1,18 @@
 package app.model.dao;
 
-import app.model.entity.Docente;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.JOptionPane;
 
+import app.model.entity.Docente;
+
 public class DocenteDAO extends BaseDAO {
+
+    private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(DocenteDAO.class.getName());
 
     public List<Docente> listar() {
         List<Docente> lista = new ArrayList<>();
@@ -70,9 +74,9 @@ public class DocenteDAO extends BaseDAO {
             }
             stmt.executeUpdate();
         } catch (java.sql.SQLException e) {
-            System.err.println("Error al guardar docente: " + e.getMessage());
-            e.printStackTrace();
-        }
+      LOGGER.severe("Error al guardar docente: " + e.getMessage());
+}
+        
     }
 
     public void eliminar(int id) {
@@ -81,8 +85,8 @@ public class DocenteDAO extends BaseDAO {
             stmt.setInt(1, id);
             stmt.executeUpdate();
         } catch (java.sql.SQLException e) {
-            System.err.println("Error al eliminar docente: " + e.getMessage());
-            e.printStackTrace();
+      LOGGER.severe("Error al eliminar docente: " + e.getMessage());
+
         }
     }
 
@@ -110,3 +114,5 @@ public class DocenteDAO extends BaseDAO {
         return -1;
     }
 }
+
+

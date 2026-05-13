@@ -1,11 +1,12 @@
 package app;
 
+import java.io.IOException;
+
 import app.util.DatabaseConnection;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.io.IOException;
 
 public class App extends Application {
 
@@ -25,7 +26,12 @@ public class App extends Application {
         stage.show();
     }
 
+<<<<<<< HEAD
     public static void main(String[] args) {
         launch(args);
+=======
+    public static void main(String[] _) {
+        launch();
+>>>>>>> bbf289d0b997c8c61c5dd9dfb96133c3e195af0a
     }
 }

@@ -78,14 +78,10 @@ public class MainController {
         filteredData = new FilteredList<>(masterData, p -> true);
 
         // listener para materia
-        txtBuscarMateria.textProperty().addListener((observable, oldValue, newValue) -> {
-            actualizarPredicadoFiltro();
-        });
+        txtBuscarMateria.textProperty().addListener((observable, oldValue, newValue) -> actualizarPredicadoFiltro());
 
         // listener para docente
-        txtBuscarDocente.textProperty().addListener((observable, oldValue, newValue) -> {
-            actualizarPredicadoFiltro();
-        });
+        txtBuscarDocente.textProperty().addListener((observable, oldValue, newValue) -> actualizarPredicadoFiltro());
 
         // conectar lista filtrada con la tabla y permitir ordenamiento por columnas
         SortedList<ResultadoFinal> sortedData = new SortedList<>(filteredData);

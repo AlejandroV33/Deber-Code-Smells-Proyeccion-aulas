@@ -14,13 +14,13 @@ public abstract class BaseDAO {
 
     protected void close(PreparedStatement stmt) {
         if (stmt != null) {
-            try { stmt.close(); } catch (SQLException e) { /* ignorar */ }
+            try { stmt.close(); } catch (SQLException _) { /* ignorar */ }
         }
     }
 
     protected void close(ResultSet rs) {
         if (rs != null) {
-            try { rs.close(); } catch (SQLException e) { /* ignorar */ }
+            try { rs.close(); } catch (SQLException _) { /* ignorar */ }
         }
     }
 }

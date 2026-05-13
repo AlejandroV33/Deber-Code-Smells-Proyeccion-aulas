@@ -1,8 +1,13 @@
 package app.controller;
 
-import app.model.entity.HorarioFila;
-import app.model.entity.Horario;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+
 import app.model.entity.Aula;
+import app.model.entity.Horario;
+import app.model.entity.HorarioFila;
 import app.model.entity.ParaleloDetalle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -11,15 +16,27 @@ import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
 
 public class GestionController {
 
@@ -101,6 +118,8 @@ public class GestionController {
 
     private javafx.collections.ObservableList<app.model.entity.AulaOcupacion> masterOcupacion = javafx.collections.FXCollections.observableArrayList();
 
+    private static final String EXCEL_FILES_LABEL = "Excel Files";
+    private static final String EXCEL_EXTENSION = "*.xlsx";
     @FXML
     public void initialize() {
         todasLasAulasCache = aulaDAO.listar();
@@ -322,19 +341,7 @@ public class GestionController {
         grid.add(new Label("Buscar:"), 0, 2); grid.add(txtFiltroAula, 1, 2);
         grid.add(new Label("Aula:"), 0, 3); grid.add(comboAulas, 1, 3);
 
-        Button btnEliminar = new Button("🗑 Eliminar este Horario");
-        btnEliminar.setStyle("-fx-background-color: #c0392b; -fx-text-fill: white;");
-        btnEliminar.setOnAction(e -> {
-            Alert conf = new Alert(Alert.AlertType.CONFIRMATION, "¿Seguro que desea eliminar el horario de " + dia + "?", ButtonType.YES, ButtonType.NO);
-            conf.showAndWait().ifPresent(res -> {
-                if (res == ButtonType.YES) {
-                    horarioDAO.eliminar(h.getId());
-                    dialog.setResult(true); // Engaña al dialog para que se cierre y recargue
-                    dialog.close();
-                }
-            });
-        });
-        grid.add(btnEliminar, 0, 4, 2, 1); // Lo añadimos al final del GridPane
+        configurarBotonEliminar(grid, h, dia, dialog);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -1011,7 +1018,7 @@ public class GestionController {
         javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
         fileChooser.setTitle("Guardar Excel de Ejemplo");
         fileChooser.setInitialFileName("Ejemplo_FIQA.xlsx");
-        fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Excel Files", "*.xlsx"));
+        fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter(EXCEL_FILES_LABEL, EXCEL_EXTENSION));
 
         java.io.File dest = fileChooser.showSaveDialog(mainTabPane.getScene().getWindow());
         if (dest != null) {
@@ -1032,7 +1039,7 @@ public class GestionController {
     public void prepararExcelCrudo() {
         javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
         fileChooser.setTitle("Seleccionar Excel Crudo");
-        fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Excel Files", "*.xlsx"));
+        fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter(EXCEL_FILES_LABEL, EXCEL_EXTENSION));
         java.io.File inputFile = fileChooser.showOpenDialog(mainTabPane.getScene().getWindow());
 
         if (inputFile != null) {
@@ -1060,7 +1067,7 @@ public class GestionController {
                         javafx.stage.FileChooser saveChooser = new javafx.stage.FileChooser();
                         saveChooser.setTitle("Guardar Excel Procesado");
                         saveChooser.setInitialFileName(inputFile.getName().replace(".xlsx", "_procesado.xlsx"));
-                        saveChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Excel Files", "*.xlsx"));
+                        saveChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter(EXCEL_FILES_LABEL, EXCEL_EXTENSION));
                         java.io.File outFile = saveChooser.showSaveDialog(mainTabPane.getScene().getWindow());
 
                         if (outFile != null) {
@@ -1090,8 +1097,11 @@ public class GestionController {
     public void extraerEInyectarDatos() {
         // 1. ALERTA DE ADVERTENCIA CRÍTICA
         Alert advertencia = new Alert(Alert.AlertType.WARNING,
-                "ATENCIÓN: Esta acción borrará todos los horarios, paralelos y docentes actuales de la base de datos " +
-                        "para reemplazarlos por los datos del archivo Excel.\n\n¿Desea hacer un respaldo de su base de datos actual antes de continuar?",
+                """
+                ATENCIÓN: Esta acción borrará todos los horarios, paralelos y docentes actuales de la base de datos \
+                para reemplazarlos por los datos del archivo Excel.
+
+                ¿Desea hacer un respaldo de su base de datos actual antes de continuar?""",
                 ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
         advertencia.setTitle("Precaución: Reescritura de Base de Datos");
 
@@ -1124,7 +1134,7 @@ public class GestionController {
         // 3. SELECCIONAR EXCEL PROCESADO E INYECTAR
         javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
         fileChooser.setTitle("Seleccione el Excel Procesado (*.xlsx)");
-        fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Excel Files", "*.xlsx", "*.csv"));
+        fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter(EXCEL_FILES_LABEL, EXCEL_EXTENSION, "*.csv"));
         java.io.File inputFile = fileChooser.showOpenDialog(mainTabPane.getScene().getWindow());
 
         if (inputFile != null) {
@@ -1320,7 +1330,7 @@ public class GestionController {
                 javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
                 fileChooser.setTitle("Guardar Reporte de Aulas");
                 fileChooser.setInitialFileName("Ocupacion_Aulas_Filtrado.xlsx");
-                fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Excel Files", "*.xlsx"));
+                fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter(EXCEL_FILES_LABEL, EXCEL_EXTENSION));
 
                 File file = fileChooser.showSaveDialog(mainTabPane.getScene().getWindow());
 
@@ -1346,5 +1356,22 @@ public class GestionController {
             Parent root = loader.load();
             mainTabPane.getScene().setRoot(root);
         } catch (IOException e) { e.printStackTrace(); }
+ 
     }
+
+    private void configurarBotonEliminar(GridPane grid, Horario h, String dia, Dialog<Boolean> dialog) {
+    Button btnEliminar = new Button("🗑 Eliminar este Horario");
+    btnEliminar.setStyle("-fx-background-color: #c0392b; -fx-text-fill: white;");
+    btnEliminar.setOnAction(e -> {
+        Alert conf = new Alert(Alert.AlertType.CONFIRMATION, "¿Seguro que desea eliminar el horario de " + dia + "?", ButtonType.YES, ButtonType.NO);
+        conf.showAndWait().ifPresent(res -> {
+            if (res == ButtonType.YES) {
+                horarioDAO.eliminar(h.getId());
+                dialog.setResult(true);
+                dialog.close();
+            }
+        });
+    });
+    grid.add(btnEliminar, 0, 4, 2, 1);
+}
 }

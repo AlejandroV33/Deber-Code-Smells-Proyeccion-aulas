@@ -61,6 +61,16 @@
           <version>${javafx.version}</version>
           <classifier>mac-aarch64</classifier>
         </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-controls</artifactId>
+          <version>21</version>
+        </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-fxml</artifactId>
+          <version>21</version>
+        </dependency>
       </dependencies>
     </profile>
     <profile>
@@ -77,6 +87,16 @@
           <artifactId>javafx-fxml</artifactId>
           <version>${javafx.version}</version>
           <classifier>linux</classifier>
+        </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-controls</artifactId>
+          <version>21</version>
+        </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-fxml</artifactId>
+          <version>21</version>
         </dependency>
       </dependencies>
     </profile>
@@ -95,12 +115,22 @@
           <version>${javafx.version}</version>
           <classifier>win</classifier>
         </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-controls</artifactId>
+          <version>21</version>
+        </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-fxml</artifactId>
+          <version>21</version>
+        </dependency>
       </dependencies>
     </profile>
   </profiles>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <javafx.version>25-ea+1</javafx.version>
+    <javafx.version>21</javafx.version>
     <maven.compiler.target>25</maven.compiler.target>
     <maven.compiler.source>25</maven.compiler.source>
   </properties>
