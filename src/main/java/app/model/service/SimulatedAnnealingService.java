@@ -415,6 +415,7 @@ public class SimulatedAnnealingService {
                 double idxAjuste = OptimizationMetrics.calcularIndiceAjuste(h.getMatriculados(), a.getCapacidad());
 
                 horarioDAO.actualizarAsignacion(h.getId(), h.getIdAulaAsignada(), prop, idxOcup, idxAjuste);
+                horarioDAO.actualizarAsignacion(h.getId(), h.getIdAulaAsignada(), prop, idxOcup, idxAjuste);
             }
         }
         logger.accept(">> guardado completo y exitoso.");

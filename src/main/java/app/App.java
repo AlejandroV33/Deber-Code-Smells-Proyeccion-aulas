@@ -26,12 +26,7 @@ public class App extends Application {
         stage.show();
     }
 
-<<<<<<< HEAD
     public static void main(String[] args) {
         launch(args);
-=======
-    public static void main(String[] _) {
-        launch();
->>>>>>> bbf289d0b997c8c61c5dd9dfb96133c3e195af0a
     }
 }

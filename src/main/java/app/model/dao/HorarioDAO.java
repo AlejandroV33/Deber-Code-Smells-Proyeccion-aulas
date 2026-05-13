@@ -1,5 +1,6 @@
 package app.model.dao;
 
+import app.model.dao.HorarioDAO.HorarioDTO;
 import app.model.entity.Horario;
 import app.model.entity.HorarioFila;
 
@@ -201,15 +202,26 @@ public class HorarioDAO extends BaseDAO {
     }
 
     public void vaciarTabla() {
-        String sql = "DELETE FROM horarios";
-        try (java.sql.PreparedStatement stmt = getConnection().prepareStatement(sql)) {
-            stmt.executeUpdate();
-            // Opcional para reiniciar IDs en SQLite:
-            getConnection().prepareStatement("UPDATE sqlite_sequence SET seq = 0 WHERE name = 'horarios'").executeUpdate();
-        } catch (java.sql.SQLException e) {
-            e.printStackTrace();
-        }
+    String sqlDelete = "DELETE FROM docentes";
+    String sqlResetId = "UPDATE sqlite_sequence SET seq = 0 WHERE name = 'docentes'";
+
+    // Obtenemos la conexión una sola vez para reutilizarla en ambas consultas
+    java.sql.Connection conn = getConnection();
+
+    // Declaramos AMBOS statements dentro de los paréntesis del try
+    try (
+        java.sql.PreparedStatement stmtDelete = conn.prepareStatement(sqlDelete);
+        java.sql.PreparedStatement stmtReset = conn.prepareStatement(sqlResetId)
+    ) {
+        // Ejecutamos ambas sentencias de forma segura
+        stmtDelete.executeUpdate();
+        stmtReset.executeUpdate();
+        
+    } catch (java.sql.SQLException e) {
+        // Siempre es buena práctica manejar la excepción o lanzarla
+        e.printStackTrace();
     }
+}
 
     public String verificarChoqueAula(int idAula, String dia, int horaInicio, int horaFin, Integer idHorarioExcluido) {
         // Lógica de solapamiento de horas: (hora_inicio_existente < hora_fin_nueva) AND (hora_fin_existente > hora_inicio_nueva)
